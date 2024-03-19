@@ -1,9 +1,22 @@
 const express = require("express");
 const conn = require("./connection");
 const app = express();
-const path = require("path");
-const wbm = require('wbm');
+const qrcode = require("qrcode-terminal");
+const { Client } = require("whatsapp-web.js");
+const client = new Client();
 
+client.on("qr", (qr) => {
+  qrcode.generate(qr, { small: true });
+});
+
+client.on("ready", () => {
+  console.log("Client is ready!");
+
+  const hereMessage = "Shop is Live";
+  sendMessageToId(hereMessage, "923259491349@c.us");
+});
+
+conn.connect()
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -11,34 +24,33 @@ app.engine("html", require("ejs").renderFile);
 
 app.use(express.static("Files"));
 const fs = require("fs");
-const { Console, log } = require("console");
 const port = 3000;
 
 app.get("/", (req, res) => {
   res.send(
     fs.readFileSync("Components/navbar.html", "utf-8") +
-      fs.readFileSync("Files/home.html", "utf-8")
+    fs.readFileSync("Files/home.html", "utf-8")
   );
 });
 
 app.get("/products", (req, res) => {
   res.send(
     fs.readFileSync("Components/navbar.html", "utf-8") +
-      fs.readFileSync("Files/products.html", "utf-8")
+    fs.readFileSync("Files/products.html", "utf-8")
   );
 });
 
 app.get("/growth", (req, res) => {
   res.send(
     fs.readFileSync("Components/navbar.html", "utf-8") +
-      fs.readFileSync("Files/growth.html", "utf-8")
+    fs.readFileSync("Files/growth.html", "utf-8")
   );
 });
 
 app.get("/insert", (req, res) => {
   res.send(
     fs.readFileSync("Components/navbar.html", "utf-8") +
-      fs.readFileSync("Files/insert.html", "utf-8")
+    fs.readFileSync("Files/insert.html", "utf-8")
   );
 });
 
@@ -48,18 +60,7 @@ app.post("/insert", (req, res) => {
   let detail = req.body.detail;
   let price = req.body.price;
   let quantity = req.body.quantity;
-  console.log(
-    "Product name is " +
-      name +
-      " Image is on " +
-      image +
-      " detail is " +
-      detail +
-      " price is " +
-      price +
-      " quantity available is " +
-      quantity
-  );
+
 
   conn.connect((err) => {
     if (err) console.log(err);
@@ -87,21 +88,19 @@ app.post("/insert", (req, res) => {
 });
 
 app.get("/refresh", (req, res) => {
-  conn.connect((err) => {
-    if (err) console.log("Line x" + err);
-    let sql = "SELECT * FROM `products`";
 
-    conn.query(sql, (err, data) => {
-      if (err) console.log("in 41");
+  let sql = "SELECT * FROM `products`";
 
-      console.log(data);
-      let products = `let products = ${JSON.stringify(data)} `;
+  conn.query(sql, (err, data) => {
+    if (err) console.log("in 41");
 
-      fs.writeFileSync("Files/product.js", products);
-    });
-    res.redirect("/");
+    let products = `let products = ${JSON.stringify(data)} `;
+
+    fs.writeFileSync("Files/product.js", products);
   });
+  res.redirect("/products");
 });
+
 
 app.get("/setting", (req, res) => {
   conn.connect((err) => {
@@ -129,7 +128,7 @@ app.get("/edit", (req, res) => {
 
   res.send(
     fs.readFileSync("Components/navbar.html", "utf-8") +
-      fs.readFileSync("Files/edit.html", "utf-8")
+    fs.readFileSync("Files/edit.html", "utf-8")
   );
 });
 
@@ -170,18 +169,55 @@ app.post("/edit", (req, res) => {
   });
 });
 
-app.get("/Message", (req, res) => {
-  res.send('ok')
+app.get("/upgrate", (req, res) => {
 
-  wbm.start().then(async () => {
-      const phones = ['+923259491349'];
-      const message = 'Good Morning.';
-      await wbm.send(phones, message);
-      await wbm.end();
-  }).catch(err => console.log(err));
+  let id = req.query.product;
+  let type = req.query.type;
+  let value = req.query.value;
+  let quantity = req.query.quantity;
+  let productname = req.query.productName;
 
+  let newQuantity;
+  if (type == 'sell') {
+    newQuantity = quantity - value
+  } else {
+    newQuantity = quantity + value
+  }
+
+  if (newQuantity <= 0) {
+    let statemenst = `the Product '${productname}' is Empty `
+    console.log(statemenst);
+    sendMessageToId(statemenst, "923259491349@c.us")
+  }
+  let sql =
+    "UPDATE `products` SET `id` = '" +
+    id +
+    "', `quantity` = '" +
+    newQuantity +
+    "' WHERE `id` = " +
+    id;
+
+  conn.query(sql, (err, data) => {
+    if (err) { console.log(err); }
+    else {
+      res.redirect('/refresh')
+    }
+  });
 });
 
+
+async function sendMessageToId(messageContent, id) {
+  try {
+    // Send the message to the specified contact or group
+    const message = await client.sendMessage(id, messageContent);
+    console.log(` Message ==> ${messageContent}  <==  sent to ${id}. Message ID: ${message.id._serialized}`);
+
+  } catch (error) {
+    console.error("Error sending message:", error);
+  }
+}
+client.initialize();
+
 app.listen(port, () => {
-  console.log("https://localhost:" + port);
+  console.log("http://localhost:" + port);
 });

@@ -37,6 +37,7 @@
 
                     & img {
                         width: 50px;
+                        mix-blend-mode: multiply;
                     }
 
                     & input {
@@ -99,7 +100,8 @@
                 }
             }
         }
-        .bi-gear-fill{
+
+        .bi-gear-fill {
             color: #424242;
         }
     </style>
@@ -118,7 +120,7 @@
     <center style="margin: 10px; color: #424242;">
         <h1>Products</h1>
     </center>
-    
+
 
 
     <table id="products">
@@ -153,36 +155,39 @@
     function buy(element) {
         let mainElement = element.parentElement.parentElement.parentElement;
 
+        let productName = mainElement.querySelector('.productName').innerHTML
         let value = mainElement.querySelector('#value').value;
-
         let quantityElement = mainElement.querySelector('.quantity'); // Use a class for quantity
         let quantity = quantityElement.innerText; // Use innerText to get the text content
-
         quantityElement.innerHTML = `<h3>${parseInt(quantity) + parseInt(value)}</h3>`;
+        window.location.href = `/upgrate?type=buy&product=${parseInt(mainElement.getAttribute('id'))}&value=${parseInt(value)}&quantity=${parseInt(quantity)}&productName=${productName}`
+
     }
 
     const sell = (element) => {
         let mainElement = element.parentElement.parentElement.parentElement;
 
+        let productName = mainElement.querySelector('.productName').innerHTML
         let value = mainElement.querySelector('#value').value;
 
         let quantityElement = mainElement.querySelector('.quantity'); // Use a class for quantity
         let quantity = quantityElement.innerText; // Use innerText to get the text content
-
         quantityElement.innerHTML = `<h3>${quantity - value}</h3>`;
+        window.location.href = `/upgrate?type=sell&product=${mainElement.getAttribute('id')}&value=${parseInt(value)}&quantity=${parseInt(quantity)}&productName=${productName}`
     }
 
     products.forEach((product) => {
         const li = document.createElement('tr');
+        li.setAttribute('id', product.id)
         li.innerHTML = `
         <a href='/setting?id=${product.id}' 
             <i class="bi bi-gear-fill"></i>
         </a>
         <td><img src='${product.image}'></td>
-        <td><h3>${product.name}</h3></td>
+        <td><h3 class='productName'>${product.name}</h3></td>
         <td><h3>${product.price}Rs</h3></td>
         <td class='quantity'><h3>${product.quantity}</h3></td>
-        <td><input id='value' value=1 type='number'></td>
+        <td><input id='value' value=1 min="0" type='number'></td>
         <td>
             <div>
                 <button id='sell' onclick='sell(this)'>Sell</button>
