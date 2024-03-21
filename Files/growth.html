@@ -22,35 +22,67 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 
 <script>
-    const xValues = ["Jan", "Feb", "Mar", "Apl", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const barColors = 'transparent';
+    fetch('http://localhost:3000/salesData')
+        .then(res => {
+            console.log(res);
+            return res.json()
+        })
+        .then(data => {
+            console.log(data);
+            console.log(typeof (data));
 
-    new Chart("myChart", {
-
-        type: "line",
-
-        data: {
-            labels: xValues,
-            datasets: [{
-                backgroundColor: barColors,
-                borderColor: 'red',
-                data: [55, 49, 44, 24, 25, 45, 23, 45, 76, 12, 45, 176],
-            }, {
-                backgroundColor: barColors,
-                borderColor: 'green',
-                name: 'buy',
-                data: [55, 45, 23, 176, 49, 44, 24, 25, 45, 76, 12, 45]
-            }]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Chart Title',
-                }
+            let months = [];
+            let dataArray = [];
+            let Price = []
+            console.log(data.length)
+            for (let i = 0; i < data.length; i++) {
+                dataArray.push(data[i].sales)
+                Price.push(data[i].price)
+                if (data[i].date == 1) months.push('Jan')
+                if (data[i].date == 2) months.push('Feb')
+                if (data[i].date == 3) months.push('Mar')
+                if (data[i].date == 4) months.push('Apr')
+                if (data[i].date == 5) months.push('May')
+                if (data[i].date == 6) months.push('Jun')
+                if (data[i].date == 7) months.push('Jul')
+                if (data[i].date == 8) months.push('Aug')
+                if (data[i].date == 9) months.push('Set')
+                if (data[i].date == 10) months.push('Oct')
+                if (data[i].date == 11) months.push('Nov')
+                if (data[i].date == 12) months.push('Dec')
             }
-        }
-    });
+            console.log(dataArray, months);
+
+
+            new Chart("myChart", {
+
+                type: "line",
+
+                data: {
+                    labels: months,
+                    datasets: [{
+                        backgroundColor: barColors,
+                        borderColor: 'blue',
+                        data: dataArray,
+                    }, {
+                        backgroundColor: barColors,
+                        borderColor: 'green',
+                        data: Price,
+                    }
+                    ]
+                },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Chart Title',
+                        }
+                    }
+                }
+            });
+        })
+
 </script>
 
 </html>

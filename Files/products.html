@@ -157,10 +157,12 @@
 
         let productName = mainElement.querySelector('.productName').innerHTML
         let value = mainElement.querySelector('#value').value;
+        let price = mainElement.querySelector('.price').innerText; // Use a class for quantity
+
         let quantityElement = mainElement.querySelector('.quantity'); // Use a class for quantity
         let quantity = quantityElement.innerText; // Use innerText to get the text content
         quantityElement.innerHTML = `<h3>${parseInt(quantity) + parseInt(value)}</h3>`;
-        window.location.href = `/upgrate?type=buy&product=${parseInt(mainElement.getAttribute('id'))}&value=${parseInt(value)}&quantity=${parseInt(quantity)}&productName=${productName}`
+        window.location.href = `/upgrate?type=buy&product=${parseInt(mainElement.getAttribute('id'))}&value=${parseInt(value)}&quantity=${parseInt(quantity)}&productName=${productName}&price=${price}`
 
     }
 
@@ -170,10 +172,11 @@
         let productName = mainElement.querySelector('.productName').innerHTML
         let value = mainElement.querySelector('#value').value;
 
+        let price = mainElement.querySelector('.price').innerText; // Use a class for quantity
         let quantityElement = mainElement.querySelector('.quantity'); // Use a class for quantity
         let quantity = quantityElement.innerText; // Use innerText to get the text content
         quantityElement.innerHTML = `<h3>${quantity - value}</h3>`;
-        window.location.href = `/upgrate?type=sell&product=${mainElement.getAttribute('id')}&value=${parseInt(value)}&quantity=${parseInt(quantity)}&productName=${productName}`
+        window.location.href = `/upgrate?type=sell&product=${mainElement.getAttribute('id')}&value=${parseInt(value)}&quantity=${parseInt(quantity)}&productName=${productName}&price=${price}`
     }
 
     products.forEach((product) => {
@@ -185,7 +188,7 @@
         </a>
         <td><img src='${product.image}'></td>
         <td><h3 class='productName'>${product.name}</h3></td>
-        <td><h3>${product.price}Rs</h3></td>
+        <td><h3><span class='price' >${product.price}</span>Rs</h3></td>
         <td class='quantity'><h3>${product.quantity}</h3></td>
         <td><input id='value' value=1 min="0" type='number'></td>
         <td>
